@@ -1,55 +1,29 @@
-const start = document.querySelector(".start-btn");
-const question = document.querySelector("#ques");
-const answers = document.querySelectorAll(".btn");
-const quiz = document.querySelector(".quiz");
-const next = document.querySelector(".next-btn");
-let questionIndex = 0;
+const ui = () => {
+  const root = document.querySelector("#root");
+  let isSelected = true;
+  let score = 0;
+  currentIdx = -1;
+  const quiz = new Quiz(root, isSelected, score, currentIdx);
 
-async function fetchData(idx) {
-  let response = await fetch(
-    "https://opentdb.com/api.php?amount=10&category=27&difficulty=easy&type=multiple"
-  );
-  let correctIdx = Math.floor(Math.random() * 3 + 1);
-  let incorrectIdx = 0;
-  let questions = await response.json();
-  let quest = questions.results[idx].question;
-  let correct = questions.results[idx].correct_answer;
-  let incorrect = questions.results[idx].incorrect_answers;
+  quiz.renderUi();
+  const form = document.querySelector(".form-group");
+  const categories = document.querySelector("#categories");
+  const btn = document.querySelector("#btn");
+  const reset = document.querySelector("#reset");
 
-  return ui(quest, correct, incorrect, correctIdx, incorrectIdx);
-}
-
-const ui = (quest, correct, incorrect, correctIdx, incorrectIdx) => {
-  question.textContent = quest;
-  answers[correctIdx].textContent = correct;
-  answers.forEach((answer, i) => {
-    if (i !== correctIdx) {
-      answer.textContent = incorrect[incorrectIdx];
-      incorrectIdx++;
-    }
+  categories.addEventListener("change", (e) => {
+    quiz.inSelect(e.target.value);
+    form.classList.add("d-none");
+    btn.classList.remove("d-none");
   });
+
+  btn.addEventListener("click", () => {
+    const questionDiv = document.querySelectorAll(".question-div");
+
+    quiz.showQuestion(questionDiv, btn);
+  });
+
+  reset.addEventListener("click", () => document.location.reload());
 };
 
-const startQuiz = () => {
-  start.classList.add("hide");
-  quiz.classList.remove("hide");
-  questionIndex++;
-};
-
-const nextQuestion = () => {
-  if (questionIndex > 9) {
-    console.log("done");
-  } else {
-    fetchData(questionIndex);
-    questionIndex++;
-  }
-};
-
-start.addEventListener("click", () => {
-  fetchData(questionIndex);
-  startQuiz();
-});
-
-next.addEventListener("click", () => {
-  nextQuestion();
-});
+ui();
